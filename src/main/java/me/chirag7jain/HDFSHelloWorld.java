@@ -10,8 +10,8 @@ import org.apache.hadoop.fs.Path;
 import java.io.IOException;
 
 public class HDFSHelloWorld {
-    public static final String theFilename = "hello.txt";
-    public static final String message = "Hello, world!\n";
+    private static final String theFilename = "hello.txt";
+    private static final String message = "Hello, world!\n";
 
     public static void main (String [] args) throws IOException {
         Configuration conf = new Configuration();
@@ -19,20 +19,14 @@ public class HDFSHelloWorld {
 
         Path filenamePath = new Path(theFilename);
 
-        try {
-            if (fs.exists(filenamePath)) {
-                // remove the file first
-                fs.delete(filenamePath);
-            }
+        try(FSDataOutputStream out = fs.create(filenamePath);FSDataInputStream in = fs.open(filenamePath);) {
+            // remove the file first
+            if (fs.exists(filenamePath)) fs.delete(filenamePath);
 
-            FSDataOutputStream out = fs.create(filenamePath);
             out.writeUTF(message);
-            out.close();
 
-            FSDataInputStream in = fs.open(filenamePath);
             String messageIn = in.readUTF();
             System.out.print(messageIn);
-            in.close();
         }
         catch (IOException ioe) {
             System.err.println("IOException during operation: " + ioe.toString());
